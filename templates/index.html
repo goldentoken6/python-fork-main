@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <title>Data Mining</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f2f2f2;
+      margin: 0;
+      padding: 20px;
+    }
+
+    h1 {
+      color: #333333;
+    }
+
+    form {
+      margin-bottom: 20px;
+    }
+
+    label {
+      font-weight: bold;
+      display: block;
+      margin-bottom: 5px;
+    }
+
+    input[type="text"] {
+      padding: 5px;
+      font-size: 14px;
+      width: 200px;
+    }
+
+    button[type="submit"] {
+      padding: 5px 10px;
+      font-size: 14px;
+      background-color: #4caf50;
+      color: white;
+      border: none;
+      cursor: pointer;
+    }
+
+    button[type="submit"]:hover {
+      background-color: #45a049;
+    }
+
+    h2 {
+      color: #333333;
+      margin-top: 20px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 10px;
+    }
+
+    th,
+    td {
+      padding: 10px;
+      text-align: left;
+      border-bottom: 1px solid #ddd;
+    }
+
+    th {
+      background-color: #f2f2f2;
+      color: #333333;
+      font-weight: bold;
+    }
+
+    tr:hover {
+      background-color: #f5f5f5;
+    }
+
+    a {
+      text-decoration: none;
+      color: #337ab7;
+    }
+
+    p {
+      color: #666666;
+    }
+
+    .input_item_box {
+      display: flex;
+      margin-top: 10px;
+      gap: 10px;
+      align-items: center;
+    }
+
+    label {
+      margin-bottom: 0px !important;
+      display: inline-block;
+      width: 130px;
+      text-align: right;
+      font-weight: bold;
+    }
+
+    .nav_button {
+      width: 32px;
+      height: 32px;
+      margin-right: 10px;
+      cursor: pointer;
+    }
+
+    #loader-container {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.5);
+      z-index: 9999;
+      display: none;
+    }
+
+    #loader {
+      position: absolute;
+      top: 0;
+      left: 0;
+      bottom: 0;
+      right: 0;
+      margin: auto;
+      border: 8px solid #f3f3f3;
+      border-top: 8px solid #3498db;
+      border-radius: 50%;
+      width: 120px;
+      height: 120px;
+      animation: spin 2s linear infinite;
+    }
+
+    @keyframes spin {
+      0% {
+        transform: rotate(0deg);
+      }
+
+      100% {
+        transform: rotate(360deg);
+      }
+    }
+  </style>
+  <script type="text/javascript">
+    const localities = [
+      'Barking and Dagenham',
+      'Barnet',
+      'Bexley',
+      'Brent',
+      'Bromley',
+      'Camden',
+      'Croydon',
+      'Ealing',
+      'Enfield',
+      'Greenwich',
+      'Hackney',
+      'Hammersmith and Fulham',
+      'Haringey',
+      'Harrow',
+      'Havering',
+      'Hillingdon',
+      'Hounslow',
+      'Islington',
+      'Kensington and Chelsea',
+      'Kingston upon Thames',
+      'Lambeth',
+      'Lewisham',
+      'Merton',
+      'Newham',
+      'Redbridge',
+      'Richmond upon Thames',
+      'Southwark',
+      'Sutton',
+      'Tower Hamlets',
+      'Waltham Forest',
+      'Wandsworth',
+      'Westminster'
+    ]
+    function initialize() {
+      const locality_select = document.getElementById('input_option');
+      var input_option = '{{input_option}}';
+      input_option = input_option.replaceAll('&nbsp;', '').replaceAll(' ', '');
+      for (let i = 0; i < localities.length; i++) {
+        const option = document.createElement('option');
+        option.value = localities[i].trim();
+        option.text = localities[i];
+        console.log
+        if (localities[i].replaceAll('&nbsp;', '').replaceAll(' ', '') == input_option) {
+          option.selected = true;
+        }
+        locality_select.appendChild(option);
+      }
+    }
+
+    document.addEventListener("DOMContentLoaded", function (event) {
+      const locality_select = document.getElementById('input_option');
+      var input_option = '{{input_option}}';
+      input_option = input_option.replaceAll('&nbsp;', '').replaceAll(' ', '');
+      for (let i = 0; i < localities.length; i++) {
+        const option = document.createElement('option');
+        option.value = localities[i].trim();
+        option.text = localities[i];
+        console.log
+        if (localities[i].replaceAll('&nbsp;', '').replaceAll(' ', '') == input_option) {
+          option.selected = true;
+        }
+        locality_select.appendChild(option);
+      }
+    });
+
+    //window.addEventListener("load", initialize);
+
+    function search_start() {
+      document.getElementById("cur_page").value = "0";
+      document.getElementById("search_action").value = "new";
+      var button = document.getElementById("start-btn");
+      document.getElementById("loader-container").style.display = "block";
+      if (document.getElementById("input_option").value.trim() != "") {
+        button.innerText = "Search in progress..."
+      }
+    }
+
+    function search_type_changed() {
+      search_type = document.getElementById("select_search_type").value;
+      if (search_type == "postal_code") {
+        document.getElementById("label_option").innerText = "Enter PostCode : ";
+        document.getElementById("label_download").innerText = "Enter PostCode : ";
+      } else {
+        document.getElementById("label_option").innerText = "Enter Locality : ";
+        document.getElementById("label_download").innerText = "Enter Locality : ";
+      }
+    }
+
+    function prevClick() {
+      document.getElementById("search_action").value = "prev";
+      var cur_page = parseInt(document.getElementById("cur_page").value);
+      if (cur_page > 0)
+        cur_page = cur_page - 1;
+      document.getElementById("cur_page").value = cur_page.toString();
+      document.getElementById("loader-container").style.display = "block";
+      document.getElementById("search_form").submit();
+    }
+
+    function nextClick() {
+      document.getElementById("search_action").value = "next";
+      var cur_page = parseInt(document.getElementById("cur_page").value);
+      cur_page = cur_page + 1;
+      document.getElementById("cur_page").value = cur_page.toString();
+      document.getElementById("loader-container").style.display = "block";
+      document.getElementById("search_form").submit();
+    }
+
+  </script>
+</head>
+
+<body>
+  <div id="loader-container">
+    <div id="loader"></div>
+  </div>
+  <h1>Data Mining</h1>
+  <form method="POST" action="https://dev.goodmealtime.com/datamining/" id="search_form">
+    <div class="input_item_box">
+      <label for="select_search_type">Select Option :</label>
+      <select name="select_search_type" id="select_search_type" style="padding: 5px; font-weight: bold;"
+        onchange="search_type_changed()">
+        {% if select_option == 'locality' %}
+        <option value="locality" selected>Locality</option>
+        {% else %}
+        <option value="locality">Locality</option>
+        {% endif %}
+
+        {% if select_option == 'postal_code' %}
+        <option value="postal_code" selected>Postal Code</option>
+        {% else %}
+        <option value="postal_code">Postal Code</option>
+        {% endif %}
+      </select>
+    </div>
+    <div class="input_item_box">
+      <label for="input_option" id="label_option">Enter Locality : </label>
+      <select id="input_option" name="input_option" style="padding: 5px; font-weight: bold;">
+      </select>
+      <button type="submit" id="start-btn" onclick="search_start()">Start Search</button>
+    </div>
+    <input type="hidden" id="cur_page" name="cur_page" value={{cur_page}}>
+    <input type="hidden" id="search_action" name="search_action">
+  </form>
+  <form action="/datamining/download" method="POST">
+    <div class="input_item_box">
+      <label for="download_option" id="label_download">Enter Locality : </label>
+      <input type="text" id="download_option" name="download_option" required>
+      <button type="submit">Download File</button>
+    </div>
+  </form>
+  <div style="display: flex; flex-direction: row; align-items: center;">
+    <h2>Overdue Accounts</h2>
+    <div style="flex-grow: 1;"></div>
+    {% if cur_page == 0 or search_started == 0 %}
+    <button disabled class="nav_button" onclick="prevClick()">&lt;</button>
+    {% else %}
+    <button class="nav_button" onclick="prevClick()">&lt;</button>
+    {% endif %}
+
+    {% if is_end == 1 or search_started == 0 %}
+    <button disabled class="nav_button" onclick="nextClick()">&gt;</button>
+    {% else %}
+    <button class="nav_button" onclick="nextClick()">&gt;</button>
+    {% endif %}
+  </div>
+
+  <table>
+    <tr>
+      <th>Company Name</th>
+      <th>Address</th>
+      <th>Company Number</th>
+      <th>Active Director</th>
+      <th>Active Secretary</th>
+      <th>Accounts Due</th>
+      <th>Confirmation Statement Due</th>
+      <th>URL</th>
+    </tr>
+    {% for account in overdue_accounts %}
+    <tr>
+      <td>{{ account['CompanyName'] }}</td>
+      <td>{{ account['Address'] }}</td>
+      <td>{{ account['CompanyNumber'] }}</td>
+      <td>{{ account['ActiveDirector'] }}</td>
+      <td>{{ account['ActiveSecretary'] }}</td>
+      <td>{{ account['AccountsDue'] }}</td>
+      <td>{{ account['ConfirmDue'] }}</td>
+      <td><a target="_blank" href="{{ account['URL'] }}">Link</a></td>
+    </tr>
+    {% endfor %}
+  </table>
+</body>
+
+</html>
